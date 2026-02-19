@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Live Word Detector 🎤</h2>
+  <p id="output">Start speaking...</p>
+
+  <script>
+    const triggerWords = ["don't move", "sleep", "run away", "blast away"];
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    const output = document.getElementById("output");
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('')
+        .toLowerCase();
+
+      output.textContent = transcript;
+
+      triggerWords.forEach(word => {
+        if (transcript.includes(word)) {
+          console.log(`⚠️ Detected word: ${word}`);
+        }
+      });
+    };
+
+    recognition.start();
+  </script>
+</body>
+</html>

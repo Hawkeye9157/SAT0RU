@@ -530,6 +530,35 @@
         updateState(detected);
     });
 
+
+    let rotationLocked = false;
+    const triggerWords = ["don't move", "sleep", "run away", "blast away"];
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+            .map(result => result[0].transcript)
+            .join('')
+            .toLowerCase();
+        
+        triggerWords.forEach(word => {
+            if (transcript.includes(word)) {
+                rotationLocked = true;
+                setTimeout(() => {
+                    rotationLocked = false;
+                }, 3000);
+            }
+        });
+    };
+
+    recognition.onerror = (e) => console.error('Speech error:', e.error);
+    recognition.onend = () => recognition.start();
+
+    recognition.start();
+
     function updateState(tech) {
         if(currentTech === tech) return;
         currentTech = tech;
@@ -586,7 +615,7 @@
         requestAnimationFrame(animate);
         idleTime += 0.01;
         
-        if (shakeIntensity > 0) {
+        if (shakeIntensity > 0 && !rotationLocked) {
             renderer.domElement.style.transform = `translate(${(Math.random()-0.5)*shakeIntensity*40}px, ${(Math.random()-0.5)*shakeIntensity*40}px)`;
         } else {
             renderer.domElement.style.transform = 'translate(0,0)';
@@ -607,10 +636,14 @@
         particles.geometry.attributes.size.needsUpdate = true;
         
         if(currentTech === 'red') {
-            particles.rotation.z -= 0.1;
+            if(!rotationLocked) {
+                particles.rotation.z -= 0.1;
+            }
         } else if (currentTech === 'purple') {
-            particles.rotation.z += 0.2; 
-            particles.rotation.y += 0.05;
+            if(!rotationLocked) {
+                particles.rotation.z += 0.2; 
+                particles.rotation.y += 0.05;
+            }
         } else if (currentTech === 'shrine') {
             // FORCE UPRIGHT: Reset and freeze all rotations
             particles.rotation.set(0, 0, 0); 
