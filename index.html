@@ -168,6 +168,35 @@
         } else return { x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 };
     }
 
+    //CSJ
+    function getPalace(i) {
+        const total = COUNT;
+    if(i < total * 0.05){ // Background Particles
+        return {x:(Math.random()-0.5)*100,y:(Math.random()-0.2)*80,z:(Math.random()-0.5)*80,r:Math.random(),g:0,b:Math.random(),s:0.2};
+    }else if(i < total * 0.45) { // Ground
+        return {x: (Math.random()-0.5)*150, y:-15,z: (Math.random()-0.5)*150,r:0.2,g:0,b:0.3,s:0.8};
+    }else if(i < total * 0.6) { // Top Outer Eye
+        const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+        const curve = Math.pow(rad/30, 2) * 20; 
+        return { x: rad*Math.cos(t), y: 30 - curve + (Math.random()*2), z: rad*Math.sin(t)*0.6, r: 0.6, g: 0, b: 0, s: 0.6 };
+    }else if(i < total * 0.80) { // Bottom Outer Eye    
+        const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+        const curve = Math.pow(rad/30, 2) * -20; 
+        return { x: rad*Math.cos(t), y: -5 - curve + (Math.random()*2), z: rad*Math.sin(t)*0.6, r: 0.6, g: 0, b: 0, s: 0.6 };
+    }else if(i < total * 0.90) { // Back Inner Eye
+        const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+        const curve = Math.pow(rad/30, 2) * -3; 
+        return { x: rad*Math.cos(t) / 2, y:13 + rad*Math.sin(t)*0.6, z:-5 - curve + (Math.random()*2), r: 0.6, g: 0.6, b: 0.6, s: 0.6 };
+    }else if(i < total * 1) { // Front Inner Eye
+        const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+        const curve = Math.pow(rad/30, 2) * 3; 
+        return { x: rad*Math.cos(t) / 2, y:13 + rad*Math.sin(t)*0.6, z:0 - curve + (Math.random()*2), r: 0.6, g: 0.6, b: 0.6, s: 0.6 };
+    }else{
+        return {x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 }
+    }
+    }
+    
+
     // Hand Tracking
     let currentTech = 'neutral';
     let shakeIntensity = 0;
@@ -191,10 +220,11 @@
                 const isUp = (t, p) => lm[t].y < lm[p].y;
                 const pinch = Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y);
                 
+                //hand sign checks
                 if (pinch < 0.04) detected = 'purple';
                 else if (isUp(8,6) && isUp(12,10) && isUp(16,14) && isUp(20,18)) detected = 'shrine';
-                else if (isUp(8,6) && isUp(12,10) && !isUp(16,14)) detected = 'void';
-                else if (isUp(8,6) && !isUp(12,10)) detected = 'red';
+                else if (isUp(8,6) && isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'void';
+                else if (isUp(8,6) && !isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'red';
             });
         }
         updateState(detected);
@@ -210,6 +240,7 @@
         else if(tech === 'purple') { glowColor = '#bb00ff'; nameEl.innerText = "Secret Technique: Hollow Purple"; bloomPass.strength = 4.0; }
         else if(tech === 'void') { glowColor = '#00ffff'; nameEl.innerText = "Domain Expansion: Infinite Void"; bloomPass.strength = 2.0; }
         else if(tech === 'red') { glowColor = '#ff3333'; nameEl.innerText = "Reverse Cursed Technique: Red"; bloomPass.strength = 2.5; }
+        else if(tech === 'palace') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Time Cell Moon Palace"; bloomPass.strength = 2.5;}
         else { glowColor = '#00ffff'; nameEl.innerText = "Neutral State"; bloomPass.strength = 1.0; }
 
         for(let i=0; i<COUNT; i++) {
@@ -224,6 +255,7 @@
             else if(tech === 'void') p = getVoid(i);
             else if(tech === 'purple') p = getPurple(i);
             else if(tech === 'shrine') p = getShrine(i);
+            else if(tech === 'palace') p = getPalace(i);
             
             targetPositions[i*3] = p.x; targetPositions[i*3+1] = p.y; targetPositions[i*3+2] = p.z;
             targetColors[i*3] = p.r; targetColors[i*3+1] = p.g; targetColors[i*3+2] = p.b;
@@ -273,7 +305,9 @@
         } else if (currentTech === 'shrine') {
             // FORCE UPRIGHT: Reset and freeze all rotations
             particles.rotation.set(0, 0, 0); 
-        } else {
+        }else if(currentTech === 'palace'){
+            particles.rotation.y +=0.0005;
+        }else {
             // Default Neutral rotation
             particles.rotation.y += 0.005;
         }
