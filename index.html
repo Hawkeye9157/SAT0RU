@@ -33,6 +33,36 @@
             transition: color 0.3s ease;
         }
 
+        #trigger-word-text { 
+            font-size: 1.2rem; 
+            color: #ff0000; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+
+            animation: flicker 5s forwards;
+        }
+
+        @keyframes flicker {
+            /* Stays solid for first half */
+            0%   { opacity: 1; }
+            50%  { opacity: 1; }
+            
+            75%  { opacity: 1; }
+            /* Final fade out with last flickers */
+            80%  { opacity: 0.0; }
+            82%  { opacity: 1; }
+            84%  { opacity: 0; }
+            88%  { opacity: 1; }
+            90%  { opacity: 0; }
+            92%  { opacity: 1; }
+            95%  { opacity: 0; }
+            97%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         /* Large Centered Camera Hub - Taller for Reel Context */
         #video-container {
             position: absolute;
@@ -98,6 +128,7 @@
     <div id="ui">
         <h1>呪術廻戦</h1>
         <div id="technique-name">CURSED ENERGY</div>
+        <div id="trigger-word-text">hi</div>
     </div>
 
     <div id="video-container">
@@ -532,11 +563,13 @@
 
 
     let rotationLocked = false;
-    const triggerWords = ["don't move", "sleep", "run away", "blast away"];
+    const triggerWords = ["don't move", "sleep", "run away", "blast away", "problem", "hello"];
 
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.continuous = true;
     recognition.interimResults = true;
+
+    const output = document.getElementById("trigger-word-text");
 
     recognition.onresult = (event) => {
         const transcript = Array.from(event.results)
@@ -547,8 +580,10 @@
         triggerWords.forEach(word => {
             if (transcript.includes(word)) {
                 rotationLocked = true;
+                output.textContent = word[0];
                 setTimeout(() => {
                     rotationLocked = false;
+                    output.textContent = "";
                 }, 3000);
             }
         });
