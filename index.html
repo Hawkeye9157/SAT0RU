@@ -142,6 +142,54 @@
     import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
+    // ---- Voice Recognition ---- 
+
+    let rotationLocked = false;
+    const triggerWords = ["don't move", "sleep", "run away", "blast away", "problem", "hello", "um"];
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+    const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('')
+        .toLowerCase();
+
+    const output = document.getElementById("trigger-word-text");
+    
+    let animationTimeout = null;
+
+    if (transcript.includes(triggerWords[0]) && !rotationLocked) {
+        rotationLocked = true;
+        const word = triggerWords[0];
+
+        if (animationTimeout) {
+            clearTimeout(animationTimeout);
+        }
+
+        output.style.animation = 'none';
+        output.textContent = word;
+
+        void output.offsetWidth;
+
+        output.style.animation = 'flicker 5s forwards';
+
+        animationTimeout = setTimeout(() => {
+            rotationLocked = false;
+            output.style.animation = 'none';
+            output.textContent = '';
+        }, 5000);
+
+        return;
+    }
+
+    if (transcript.includes(triggerWords[1])) {
+        
+    }
+    };
+
     // --- Scene & Rendering ---
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -561,48 +609,6 @@
         updateState(detected);
     });
 
-
-    let rotationLocked = false;
-    const triggerWords = ["don't move", "sleep", "run away", "blast away", "problem", "hello", "um"];
-
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onresult = (event) => {
-    const transcript = Array.from(event.results)
-        .map(result => result[0].transcript)
-        .join('')
-        .toLowerCase();
-
-    const output = document.getElementById("trigger-word-text");
-    
-    let animationTimeout = null;
-
-    if (transcript.includes(triggerWords[0]) && !rotationLocked) {
-        rotationLocked = true;
-        const word = triggerWords[0];
-
-        if (animationTimeout) {
-            clearTimeout(animationTimeout);
-        }
-
-        output.style.animation = 'none';
-        output.textContent = word;
-
-        void output.offsetWidth;
-
-        output.style.animation = 'flicker 5s forwards';
-
-        animationTimeout = setTimeout(() => {
-            rotationLocked = false;
-            output.style.animation = 'none';
-            output.textContent = '';
-        }, 5000);
-
-        return;
-    }
-};
 
     recognition.onerror = (e) => console.error('Speech error:', e.error);
     recognition.onend = () => recognition.start();
