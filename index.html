@@ -171,29 +171,29 @@
     //CSJ
     function getPalace(i) {
         const total = COUNT;
-    if(i < total * 0.05){ // Background Particles
-        return {x:(Math.random()-0.5)*100,y:(Math.random()-0.2)*80,z:(Math.random()-0.5)*80,r:Math.random(),g:0,b:Math.random(),s:0.2};
-    }else if(i < total * 0.45) { // Ground
-        return {x: (Math.random()-0.5)*150, y:-15,z: (Math.random()-0.5)*150,r:0.2,g:0,b:0.3,s:0.8};
-    }else if(i < total * 0.6) { // Top Outer Eye
-        const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
-        const curve = Math.pow(rad/30, 2) * 20; 
-        return { x: rad*Math.cos(t), y: 30 - curve + (Math.random()*2), z: rad*Math.sin(t)*0.6, r: 0.6, g: 0, b: 0, s: 0.6 };
-    }else if(i < total * 0.80) { // Bottom Outer Eye    
-        const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
-        const curve = Math.pow(rad/30, 2) * -20; 
-        return { x: rad*Math.cos(t), y: -5 - curve + (Math.random()*2), z: rad*Math.sin(t)*0.6, r: 0.6, g: 0, b: 0, s: 0.6 };
-    }else if(i < total * 0.90) { // Back Inner Eye
-        const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
-        const curve = Math.pow(rad/30, 2) * -3; 
-        return { x: rad*Math.cos(t) / 2, y:13 + rad*Math.sin(t)*0.6, z:-5 - curve + (Math.random()*2), r: 0.6, g: 0.6, b: 0.6, s: 0.6 };
-    }else if(i < total * 1) { // Front Inner Eye
-        const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
-        const curve = Math.pow(rad/30, 2) * 3; 
-        return { x: rad*Math.cos(t) / 2, y:13 + rad*Math.sin(t)*0.6, z:0 - curve + (Math.random()*2), r: 0.6, g: 0.6, b: 0.6, s: 0.6 };
-    }else{
-        return {x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 }
-    }
+        if(i < total * 0.05){ // Background Particles
+            return {x:(Math.random()-0.5)*100,y:(Math.random()-0.2)*80,z:(Math.random()-0.5)*80,r:Math.random(),g:0,b:Math.random(),s:0.2};
+        }else if(i < total * 0.45) { // Ground
+            return {x: (Math.random()-0.5)*150, y:-15,z: (Math.random()-0.5)*150,r:2,g:0,b:3,s:0.8};
+        }else if(i < total * 0.6) { // Top Outer Eye
+            const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+            const curve = Math.pow(rad/30, 2) * 20; 
+            return { x: rad*Math.cos(t), y: 30 - curve + (Math.random()*2), z: rad*Math.sin(t)*0.6, r: 3, g: 0, b: 0, s: 0.6 };
+        }else if(i < total * 0.80) { // Bottom Outer Eye    
+            const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+            const curve = Math.pow(rad/30, 2) * -20; 
+            return { x: rad*Math.cos(t), y: -5 - curve + (Math.random()*2), z: rad*Math.sin(t)*0.6, r: 3, g: 0, b: 0, s: 0.6 };
+        }else if(i < total * 0.90) { // Back Inner Eye
+            const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+            const curve = Math.pow(rad/30, 2) * -3; 
+            return { x: rad*Math.cos(t) / 2, y:13 + rad*Math.sin(t)*0.6, z:-5 - curve + (Math.random()*2), r: 0.6, g: 0.6, b: 0.6, s: 0.6 };
+        }else if(i < total * 1) { // Front Inner Eye
+            const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+            const curve = Math.pow(rad/30, 2) * 3; 
+            return { x: rad*Math.cos(t) / 2, y:13 + rad*Math.sin(t)*0.6, z:0 - curve + (Math.random()*2), r: 0.6, g: 0.6, b: 0.6, s: 0.6 };
+        }else{
+            return {x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 }
+        }
     }
     
 
@@ -218,13 +218,15 @@
                 drawLandmarks(canvasCtx, lm, {color: '#fff', lineWidth: 1, radius: 2});
 
                 const isUp = (t, p) => lm[t].y < lm[p].y;
+                
                 const pinch = Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y);
                 
                 //hand sign checks
                 if (pinch < 0.04) detected = 'purple';
                 else if (isUp(8,6) && isUp(12,10) && isUp(16,14) && isUp(20,18)) detected = 'shrine';
                 else if (isUp(8,6) && isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'void';
-                else if (isUp(8,6) && !isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'red';
+                else if (!isUp(4,3) && isUp(8,6) && !isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'red';
+                else if (isUp(4,3) && isUp(8,6) && !isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'palace';
             });
         }
         updateState(detected);
