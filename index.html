@@ -57,6 +57,29 @@
             pointer-events: none; z-index: 5;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
         }
+
+        /* Idle Death Gamble — pulsing void vignette */
+        #idle-flash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 4;
+            opacity: 0;
+            background: radial-gradient(ellipse at center, rgba(80,0,120,0.3) 0%, transparent 70%);
+            transition: opacity 0.5s ease;
+        }
+        #idle-flash.active {
+            animation: idlePulse 2.5s ease-in-out infinite;
+        }
+        @keyframes idlePulse {
+            0%   { opacity: 0; }
+            40%  { opacity: 1; }
+            60%  { opacity: 0.6; }
+            100% { opacity: 0; }
+        }
+
+        /* Technique name color transition */
+        #technique-name {
+            transition: color 0.3s ease;
+        }
     </style>
     
     <script type="importmap">
@@ -74,6 +97,7 @@
 <body>
 
     <div id="grain"></div>
+    <div id="idle-flash"></div>
 
     <div id="ui">
         <h1>呪術廻戦</h1>
@@ -168,12 +192,60 @@
         } else return { x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 };
     }
 
+    // IDLE DEATH GAMBLE — Domain Expansion (Benten-no-mai mudra)
+    // Layers: amber-white singularity core → violet fate-horizon ring →
+    //         probability node clusters → spiral tendrils → outer void shroud
+    function getIdleDeathGamble(i) {
+        const total = COUNT;
+        // Layer 1 (5%): collapsed probability core — hot white-gold singularity
+        if (i < total * 0.05) {
+            const r = Math.random() * 4;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const heat = Math.random();
+            return { x: r*Math.sin(phi)*Math.cos(theta), y: r*Math.sin(phi)*Math.sin(theta), z: r*Math.cos(phi), r: 1.0, g: heat*0.85, b: heat*0.3, s: 3.5 };
+        }
+        // Layer 2 (10%): fate-horizon ring — sharp violet band
+        else if (i < total * 0.15) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 18 + Math.random() * 4;
+            return { x: radius*Math.cos(angle), y: radius*Math.sin(angle) + (Math.random()-0.5)*2, z: (Math.random()-0.5)*2, r: 0.7, g: 0.0, b: 1.0, s: 2.0 };
+        }
+        // Layer 3 (25%): 6 probability node clusters — scattered dice-like bursts
+        else if (i < total * 0.40) {
+            const clusterIndex = Math.floor(Math.random() * 6);
+            const clusterAngles = [0, 1.05, 2.09, 3.14, 4.19, 5.24];
+            const clusterR = 28 + (clusterIndex % 3) * 6;
+            const cx = clusterR * Math.cos(clusterAngles[clusterIndex]);
+            const cy = clusterR * Math.sin(clusterAngles[clusterIndex]) * 0.5;
+            const cz = (clusterIndex % 2 === 0 ? 1 : -1) * 8;
+            return { x: cx+(Math.random()-0.5)*8, y: cy+(Math.random()-0.5)*8, z: cz+(Math.random()-0.5)*8, r: 0.45, g: 0.0, b: 0.65, s: 0.9 };
+        }
+        // Layer 4 (20%): spiral inevitability arms — cursed energy tendrils
+        else if (i < total * 0.60) {
+            const t = (i - total * 0.40) / (total * 0.20);
+            const armOffset = (i % 3) * (Math.PI * 2 / 3);
+            const angle = t * 18 + armOffset;
+            const radius = 5 + t * 45;
+            return { x: radius*Math.cos(angle), y: radius*Math.sin(angle)+(Math.random()-0.5)*(6*t), z: (Math.random()-0.5)*(12*t), r: 0.25, g: 0.0, b: 0.35, s: 0.7 };
+        }
+        // Layer 5 (40%): outer void shroud — deep cosmic death field
+        else {
+            const radius = 55 + Math.random() * 55;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            return { x: radius*Math.sin(phi)*Math.cos(theta), y: radius*Math.sin(phi)*Math.sin(theta), z: radius*Math.cos(phi), r: 0.12, g: 0.0, b: 0.18, s: 0.5 };
+        }
+    }
+
     // Hand Tracking
     let currentTech = 'neutral';
     let shakeIntensity = 0;
+    let idleTime = 0;
     const videoElement = document.querySelector('.input_video');
     const canvasElement = document.getElementById('output_canvas');
     const canvasCtx = canvasElement.getContext('2d');
+    const idleFlash = document.getElementById('idle-flash');
     let glowColor = '#00ffff';
 
     const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
@@ -183,19 +255,56 @@
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
         let detected = 'neutral';
 
-        if (results.multiHandLandmarks) {
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+
+            // Draw all detected hands
             results.multiHandLandmarks.forEach((lm) => {
                 drawConnectors(canvasCtx, lm, HAND_CONNECTIONS, {color: glowColor, lineWidth: 5});
                 drawLandmarks(canvasCtx, lm, {color: '#fff', lineWidth: 1, radius: 2});
+            });
 
+            
+            // Requires BOTH hands visible, index fingers pointing up, fingertips close together
+            if (results.multiHandLandmarks.length === 2) {
+                const lm0 = results.multiHandLandmarks[0];
+                const lm1 = results.multiHandLandmarks[1];
+                const isUpH = (lm, t, p) => lm[t].y < lm[p].y;
+
+                const bothIndexUp = isUpH(lm0, 8, 6) && isUpH(lm1, 8, 6);
+                const bothMiddleUp = isUpH(lm0, 12, 10) && isUpH(lm1, 12, 10);
+
+                // Distance between the two index fingertips — should be close for the seal
+                const tipDist = Math.hypot(lm0[8].x - lm1[8].x, lm0[8].y - lm1[8].y);
+
+                // Distance between middle fingertips as well
+                const midDist = Math.hypot(lm0[12].x - lm1[12].x, lm0[12].y - lm1[12].y);
+
+                if (bothIndexUp && bothMiddleUp && tipDist < 0.18 && midDist < 0.22) {
+                    detected = 'shrine';
+                }
+
+                // --- Idle Death Gamble---
+                // One hand: OK/circle pinch (thumb + index touching)
+                // Other hand: flat open palm (all four fingers extended)
+                if (detected === 'neutral') {
+                    const isPinch = (lm) => Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y) < 0.07;
+                    const isFlat  = (lm) => lm[8].y < lm[6].y && lm[12].y < lm[10].y && lm[16].y < lm[14].y && lm[20].y < lm[18].y;
+                    if ((isPinch(lm0) && isFlat(lm1)) || (isPinch(lm1) && isFlat(lm0))) {
+                        detected = 'idle';
+                    }
+                }
+            }
+
+            // --- Single-hand gestures (only if shrine not already detected) ---
+            if (detected === 'neutral') {
+                const lm = results.multiHandLandmarks[0];
                 const isUp = (t, p) => lm[t].y < lm[p].y;
                 const pinch = Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y);
-                
+
                 if (pinch < 0.04) detected = 'purple';
-                else if (isUp(8,6) && isUp(12,10) && isUp(16,14) && isUp(20,18)) detected = 'shrine';
                 else if (isUp(8,6) && isUp(12,10) && !isUp(16,14)) detected = 'void';
                 else if (isUp(8,6) && !isUp(12,10)) detected = 'red';
-            });
+            }
         }
         updateState(detected);
     });
@@ -205,12 +314,14 @@
         currentTech = tech;
         const nameEl = document.getElementById('technique-name');
         shakeIntensity = tech !== 'neutral' ? 0.4 : 0;
+        idleTime = 0;
 
-        if(tech === 'shrine') { glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Malevolent Shrine"; bloomPass.strength = 2.5; }
-        else if(tech === 'purple') { glowColor = '#bb00ff'; nameEl.innerText = "Secret Technique: Hollow Purple"; bloomPass.strength = 4.0; }
-        else if(tech === 'void') { glowColor = '#00ffff'; nameEl.innerText = "Domain Expansion: Infinite Void"; bloomPass.strength = 2.0; }
-        else if(tech === 'red') { glowColor = '#ff3333'; nameEl.innerText = "Reverse Cursed Technique: Red"; bloomPass.strength = 2.5; }
-        else { glowColor = '#00ffff'; nameEl.innerText = "Neutral State"; bloomPass.strength = 1.0; }
+        if(tech === 'shrine') { glowColor = '#ff0000'; nameEl.style.color = '#ff3333'; nameEl.innerText = "Domain Expansion: Malevolent Shrine"; bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
+        else if(tech === 'purple') { glowColor = '#bb00ff'; nameEl.style.color = '#cc66ff'; nameEl.innerText = "Secret Technique: Hollow Purple"; bloomPass.strength = 4.0; idleFlash.classList.remove('active'); }
+        else if(tech === 'void') { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Domain Expansion: Infinite Void"; bloomPass.strength = 2.0; idleFlash.classList.remove('active'); }
+        else if(tech === 'red') { glowColor = '#ff3333'; nameEl.style.color = '#ff4444'; nameEl.innerText = "Reverse Cursed Technique: Red"; bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
+        else if(tech === 'idle') { glowColor = '#aa00ff'; nameEl.style.color = '#9933ff'; nameEl.innerText = "Domain Expansion: Idle Death Gamble"; bloomPass.strength = 3.5; idleFlash.classList.add('active'); }
+        else { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Neutral State"; bloomPass.strength = 1.0; idleFlash.classList.remove('active'); }
 
         for(let i=0; i<COUNT; i++) {
             let p;
@@ -224,6 +335,7 @@
             else if(tech === 'void') p = getVoid(i);
             else if(tech === 'purple') p = getPurple(i);
             else if(tech === 'shrine') p = getShrine(i);
+            else if(tech === 'idle') p = getIdleDeathGamble(i);
             
             targetPositions[i*3] = p.x; targetPositions[i*3+1] = p.y; targetPositions[i*3+2] = p.z;
             targetColors[i*3] = p.r; targetColors[i*3+1] = p.g; targetColors[i*3+2] = p.b;
@@ -243,6 +355,7 @@
     // Animation
     function animate() {
         requestAnimationFrame(animate);
+        idleTime += 0.01;
         
         if (shakeIntensity > 0) {
             renderer.domElement.style.transform = `translate(${(Math.random()-0.5)*shakeIntensity*40}px, ${(Math.random()-0.5)*shakeIntensity*40}px)`;
@@ -273,6 +386,12 @@
         } else if (currentTech === 'shrine') {
             // FORCE UPRIGHT: Reset and freeze all rotations
             particles.rotation.set(0, 0, 0); 
+        } else if (currentTech === 'idle') {
+            // Slow ominous anti-clockwise precession — fate turning backward
+            particles.rotation.y -= 0.008;
+            particles.rotation.z += 0.003;
+            // Bloom pulses like a probability "dice roll"
+            bloomPass.strength = 3.0 + Math.sin(idleTime * 2.2) * 1.2;
         } else {
             // Default Neutral rotation
             particles.rotation.y += 0.005;
