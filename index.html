@@ -30,6 +30,7 @@
             font-weight: bold; letter-spacing: 4px;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transition: color 0.3s ease;
         }
 
         /* Large Centered Camera Hub - Taller for Reel Context */
@@ -74,11 +75,6 @@
             40%  { opacity: 1; }
             60%  { opacity: 0.6; }
             100% { opacity: 0; }
-        }
-
-        /* Technique name color transition */
-        #technique-name {
-            transition: color 0.3s ease;
         }
     </style>
     
@@ -147,7 +143,8 @@
     const particles = new THREE.Points(geometry, new THREE.PointsMaterial({ size: 0.3, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
     scene.add(particles);
 
-    // Technique Functions 
+    // ─── Technique Functions ─────────────────────────────────────────────────
+
     function getRed(i) {
         if(i < COUNT * 0.1) {
             const r = Math.random() * 9;
@@ -192,12 +189,10 @@
         } else return { x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 };
     }
 
-    // IDLE DEATH GAMBLE — Domain Expansion (Benten-no-mai mudra)
-    // Layers: amber-white singularity core → violet fate-horizon ring →
-    //         probability node clusters → spiral tendrils → outer void shroud
+    // IDLE DEATH GAMBLE — Domain Expansion
     function getIdleDeathGamble(i) {
         const total = COUNT;
-        // Layer 1 (5%): collapsed probability core — hot white-gold singularity
+        // Layer 1: collapsed probability core — hot white-gold singularity
         if (i < total * 0.05) {
             const r = Math.random() * 4;
             const theta = Math.random() * Math.PI * 2;
@@ -205,13 +200,13 @@
             const heat = Math.random();
             return { x: r*Math.sin(phi)*Math.cos(theta), y: r*Math.sin(phi)*Math.sin(theta), z: r*Math.cos(phi), r: 1.0, g: heat*0.85, b: heat*0.3, s: 3.5 };
         }
-        // Layer 2 (10%): fate-horizon ring — sharp violet band
+        // Layer 2: fate-horizon ring — sharp violet band
         else if (i < total * 0.15) {
             const angle = Math.random() * Math.PI * 2;
             const radius = 18 + Math.random() * 4;
             return { x: radius*Math.cos(angle), y: radius*Math.sin(angle) + (Math.random()-0.5)*2, z: (Math.random()-0.5)*2, r: 0.7, g: 0.0, b: 1.0, s: 2.0 };
         }
-        // Layer 3 (25%): 6 probability node clusters — scattered dice-like bursts
+        // Layer 3: 6 probability node clusters — scattered dice-like bursts
         else if (i < total * 0.40) {
             const clusterIndex = Math.floor(Math.random() * 6);
             const clusterAngles = [0, 1.05, 2.09, 3.14, 4.19, 5.24];
@@ -221,7 +216,7 @@
             const cz = (clusterIndex % 2 === 0 ? 1 : -1) * 8;
             return { x: cx+(Math.random()-0.5)*8, y: cy+(Math.random()-0.5)*8, z: cz+(Math.random()-0.5)*8, r: 0.45, g: 0.0, b: 0.65, s: 0.9 };
         }
-        // Layer 4 (20%): spiral inevitability arms — cursed energy tendrils
+        // Layer 4: spiral inevitability arms — cursed energy tendrils
         else if (i < total * 0.60) {
             const t = (i - total * 0.40) / (total * 0.20);
             const armOffset = (i % 3) * (Math.PI * 2 / 3);
@@ -229,7 +224,7 @@
             const radius = 5 + t * 45;
             return { x: radius*Math.cos(angle), y: radius*Math.sin(angle)+(Math.random()-0.5)*(6*t), z: (Math.random()-0.5)*(12*t), r: 0.25, g: 0.0, b: 0.35, s: 0.7 };
         }
-        // Layer 5 (40%): outer void shroud — deep cosmic death field
+        // Layer 5: outer void shroud — deep cosmic death field
         else {
             const radius = 55 + Math.random() * 55;
             const theta = Math.random() * Math.PI * 2;
@@ -238,7 +233,159 @@
         }
     }
 
-    // Hand Tracking
+    // AUTHENTIC MUTUAL LOVE — Domain Expansion
+    function getAuthenticMutualLove(i) {
+        const total = COUNT;
+        // Layer 1: Sword blade — tapered white-gold column along Y axis
+        if (i < total * 0.15) {
+            const t = (i / (total * 0.15));
+            const bladeY = -20 + t * 55;
+            const thickness = (1 - t) * 1.2 + 0.1;
+            const heat = 1 - t * 0.4;
+            return { x: (Math.random()-0.5)*thickness, y: bladeY+(Math.random()-0.5)*0.6, z: (Math.random()-0.5)*thickness, r: heat, g: heat*0.92, b: heat*0.6, s: 1.8 - t*1.0 };
+        }
+        // Layer 2: Crossguard — wide horizontal gold bar at hilt
+        else if (i < total * 0.19) {
+            return { x: (Math.random()-0.5)*18, y: -14+(Math.random()-0.5)*0.8, z: (Math.random()-0.5)*1.2, r: 1.0, g: 0.82, b: 0.2, s: 1.6 };
+        }
+        // Layer 3: Diamond gem ring — crisp orbital band, sapphire blue
+        else if (i < total * 0.37) {
+            const angle = ((i - total * 0.19) / (total * 0.18)) * Math.PI * 2;
+            const ringR = 22, tilt = 0.09;
+            return { x: ringR*Math.cos(angle), y: ringR*Math.sin(angle)*tilt+(Math.random()-0.5)*0.5, z: ringR*Math.sin(angle), r: 0.05, g: 0.55, b: 1.0, s: 2.2 };
+        }
+        // Layer 4: Gem sparkle halo — fine cyan motes just outside the ring
+        else if (i < total * 0.49) {
+            const angle = Math.random() * Math.PI * 2;
+            const ringR = 22 + (Math.random()-0.5)*5, tilt = 0.09;
+            return { x: ringR*Math.cos(angle), y: ringR*Math.sin(angle)*tilt+(Math.random()-0.5)*2, z: ringR*Math.sin(angle), r: 0.3, g: 0.8, b: 1.0, s: 0.7 };
+        }
+        // Layer 5: Ambient love field — soft rose-gold sphere
+        else {
+            const radius = 40 + Math.random()*55, theta = Math.random()*Math.PI*2, phi = Math.acos(2*Math.random()-1);
+            const warmth = Math.random();
+            return { x: radius*Math.sin(phi)*Math.cos(theta), y: radius*Math.sin(phi)*Math.sin(theta), z: radius*Math.cos(phi), r: 0.9, g: warmth*0.45, b: warmth*0.55, s: 0.4 };
+        }
+    }
+
+    // DEADLY SENTENCING — Domain Expansion
+    function getDeadlySentencing(i) {
+        const total = COUNT;
+
+        const headLen = 16;   // half-length along cylinder axis
+        const headR   = 5;    // cylinder radius
+        const headCX  = 2;    // slightly right of center
+        const headCY  = 6;    // vertical center of cylinder
+
+        // Tilt the cylinder head
+        const tiltAng = -Math.PI * 0.22;  
+        const tCos = Math.cos(tiltAng), tSin = Math.sin(tiltAng);
+        const tiltHead = (lx, ly) => ({
+            x: headCX + lx * tCos - ly * tSin,
+            y: headCY + lx * tSin + ly * tCos
+        });
+
+        // Handle attaches at the exact rotated bottom of the cylinder
+        const tiltedBottom = tiltHead(0, -headR);
+        const handleStartX = tiltedBottom.x;
+        const handleStartY = tiltedBottom.y;
+        const handleAng = Math.PI * 1.22; 
+        const hCos = Math.cos(handleAng);
+        const hSin = Math.sin(handleAng);
+
+        // ── Layer 1: Head cylinder — hollow barrel surface
+        if (i < total * 0.20) {
+            const lx       = (Math.random() - 0.5) * headLen * 2;
+            const cAng     = Math.random() * Math.PI * 2;
+            const ly       = Math.cos(cAng) * headR;
+            const lz       = Math.sin(cAng) * headR;
+            const highlight = Math.max(0, -Math.cos(cAng)) * 0.12;
+            const w = tiltHead(lx, ly);
+            return {
+                x: w.x, y: w.y, z: lz,
+                r: 0.40 + highlight, g: 0.20 + highlight, b: 0.04,
+                s: 0.85
+            };
+        }
+
+        // ── Layer 2: End caps — circular disc on each end
+        else if (i < total * 0.26) {
+            const side   = (i % 2 === 0) ? -headLen : headLen;
+            const capAng = Math.random() * Math.PI * 2;
+            const capR   = Math.random() * headR;
+            const w = tiltHead(side, Math.cos(capAng) * capR);
+            return {
+                x: w.x, y: w.y,
+                z: Math.sin(capAng) * capR,
+                r: 0.28, g: 0.13, b: 0.03,
+                s: 0.9
+            };
+        }
+
+        // ── Layer 3: Gold band — proud ring at cylinder center
+        else if (i < total * 0.36) {
+            const lx    = (Math.random() - 0.5) * 5;
+            const cAng  = Math.random() * Math.PI * 2;
+            const bandR = headR + 0.6;
+            const sheen = 0.65 + Math.max(0, -Math.cos(cAng)) * 0.35;
+            const w = tiltHead(lx, Math.cos(cAng) * bandR);
+            return {
+                x: w.x, y: w.y,
+                z: Math.sin(cAng) * bandR,
+                r: sheen, g: sheen * 0.76, b: 0.04,
+                s: 1.2
+            };
+        }
+
+        // ── Layer 4: Handle — from bottom of cylinder, angles down-left
+        else if (i < total * 0.50) {
+            const t      = (i - total * 0.36) / (total * 0.14); // 0=neck, 1=grip
+            const dist   = t * 30;            // starts at 0 = exactly at connection point
+            const radius = 1.3 - t * 0.85;   // tapers toward grip
+            const cAng   = Math.random() * Math.PI * 2;
+            // Perpendicular to handle direction (for cross-section thickness)
+            const perpX  = -hSin, perpY = hCos;
+            const cr     = radius * Math.cos(cAng);
+            const lz     = radius * Math.sin(cAng);
+            return {
+                x: handleStartX + hCos * dist + perpX * cr,
+                y: handleStartY + hSin * dist + perpY * cr,
+                z: lz,
+                r: 0.38 - t * 0.12, g: 0.18 - t * 0.06, b: 0.02,
+                s: 1.0 - t * 0.4
+            };
+        }
+
+        // ── Layer 5: Sound block dome — wide low dome below gavel
+        else if (i < total * 0.72) {
+            const bAng  = Math.random() * Math.PI * 2;
+            const bR    = Math.random() * 20;
+            const domeH = Math.sqrt(Math.max(0, 1 - (bR / 20) ** 2)) * 4;
+            return {
+                x: bR * Math.cos(bAng),
+                y: -20 + domeH * Math.random(),
+                z: (Math.random() - 0.5) * bR * 0.55,
+                r: 0.44, g: 0.22, b: 0.04,
+                s: 0.8
+            };
+        }
+
+        // ── Layer 6: Courtroom void — dim sparse ambient sphere
+        else {
+            const radius = 50 + Math.random() * 60;
+            const theta  = Math.random() * Math.PI * 2;
+            const phi    = Math.acos(2 * Math.random() - 1);
+            return {
+                x: radius * Math.sin(phi) * Math.cos(theta),
+                y: radius * Math.sin(phi) * Math.sin(theta),
+                z: radius * Math.cos(phi),
+                r: 0.05, g: 0.03, b: 0.02,
+                s: 0.3
+            };
+        }
+    }
+
+    // ─── Hand Tracking ───────────────────────────────────────────────────────
     let currentTech = 'neutral';
     let shakeIntensity = 0;
     let idleTime = 0;
@@ -263,29 +410,23 @@
                 drawLandmarks(canvasCtx, lm, {color: '#fff', lineWidth: 1, radius: 2});
             });
 
-            
-            // Requires BOTH hands visible, index fingers pointing up, fingertips close together
+            // ── TWO-HAND GESTURES ─────────────────────────────────────────────
+
             if (results.multiHandLandmarks.length === 2) {
                 const lm0 = results.multiHandLandmarks[0];
                 const lm1 = results.multiHandLandmarks[1];
                 const isUpH = (lm, t, p) => lm[t].y < lm[p].y;
 
-                const bothIndexUp = isUpH(lm0, 8, 6) && isUpH(lm1, 8, 6);
+                // Shrine: both index + middle up, fingertips close together
+                const bothIndexUp  = isUpH(lm0, 8, 6)  && isUpH(lm1, 8, 6);
                 const bothMiddleUp = isUpH(lm0, 12, 10) && isUpH(lm1, 12, 10);
-
-                // Distance between the two index fingertips — should be close for the seal
                 const tipDist = Math.hypot(lm0[8].x - lm1[8].x, lm0[8].y - lm1[8].y);
-
-                // Distance between middle fingertips as well
                 const midDist = Math.hypot(lm0[12].x - lm1[12].x, lm0[12].y - lm1[12].y);
-
                 if (bothIndexUp && bothMiddleUp && tipDist < 0.18 && midDist < 0.22) {
                     detected = 'shrine';
                 }
 
-                // --- Idle Death Gamble---
-                // One hand: OK/circle pinch (thumb + index touching)
-                // Other hand: flat open palm (all four fingers extended)
+                // Idle Death Gamble: one hand pinching (OK circle), one hand flat
                 if (detected === 'neutral') {
                     const isPinch = (lm) => Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y) < 0.07;
                     const isFlat  = (lm) => lm[8].y < lm[6].y && lm[12].y < lm[10].y && lm[16].y < lm[14].y && lm[20].y < lm[18].y;
@@ -295,15 +436,24 @@
                 }
             }
 
-            // --- Single-hand gestures (only if shrine not already detected) ---
+            // ── SINGLE-HAND GESTURES ──────────────────────────────────────────
             if (detected === 'neutral') {
                 const lm = results.multiHandLandmarks[0];
                 const isUp = (t, p) => lm[t].y < lm[p].y;
                 const pinch = Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y);
 
                 if (pinch < 0.04) detected = 'purple';
+                // Fist: all four fingers curled — Deadly Sentencing
+                else if (!isUp(8,6) && !isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'sentence';
+                // ILY: index + pinky up, middle + ring folded, thumb extended
+                else if (
+                    isUp(8, 6) && isUp(20, 18) && !isUp(12, 10) && !isUp(16, 14) &&
+                    Math.hypot(lm[4].x - lm[0].x, lm[4].y - lm[0].y) > 0.25
+                ) detected = 'love';
+                // Void: index + middle up, ring down
                 else if (isUp(8,6) && isUp(12,10) && !isUp(16,14)) detected = 'void';
-                else if (isUp(8,6) && !isUp(12,10)) detected = 'red';
+                // Red: index up only, pinky down (guards against ILY)
+                else if (isUp(8,6) && !isUp(12,10) && !isUp(20,18)) detected = 'red';
             }
         }
         updateState(detected);
@@ -316,11 +466,13 @@
         shakeIntensity = tech !== 'neutral' ? 0.4 : 0;
         idleTime = 0;
 
-        if(tech === 'shrine') { glowColor = '#ff0000'; nameEl.style.color = '#ff3333'; nameEl.innerText = "Domain Expansion: Malevolent Shrine"; bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
-        else if(tech === 'purple') { glowColor = '#bb00ff'; nameEl.style.color = '#cc66ff'; nameEl.innerText = "Secret Technique: Hollow Purple"; bloomPass.strength = 4.0; idleFlash.classList.remove('active'); }
-        else if(tech === 'void') { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Domain Expansion: Infinite Void"; bloomPass.strength = 2.0; idleFlash.classList.remove('active'); }
-        else if(tech === 'red') { glowColor = '#ff3333'; nameEl.style.color = '#ff4444'; nameEl.innerText = "Reverse Cursed Technique: Red"; bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
-        else if(tech === 'idle') { glowColor = '#aa00ff'; nameEl.style.color = '#9933ff'; nameEl.innerText = "Domain Expansion: Idle Death Gamble"; bloomPass.strength = 3.5; idleFlash.classList.add('active'); }
+        if(tech === 'shrine')   { glowColor = '#ff0000'; nameEl.style.color = '#ff3333'; nameEl.innerText = "Domain Expansion: Malevolent Shrine";     bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
+        else if(tech === 'purple')   { glowColor = '#bb00ff'; nameEl.style.color = '#cc66ff'; nameEl.innerText = "Secret Technique: Hollow Purple";           bloomPass.strength = 4.0; idleFlash.classList.remove('active'); }
+        else if(tech === 'void')     { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Domain Expansion: Infinite Void";           bloomPass.strength = 2.0; idleFlash.classList.remove('active'); }
+        else if(tech === 'red')      { glowColor = '#ff3333'; nameEl.style.color = '#ff4444'; nameEl.innerText = "Reverse Cursed Technique: Red";             bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
+        else if(tech === 'idle')     { glowColor = '#aa00ff'; nameEl.style.color = '#9933ff'; nameEl.innerText = "Domain Expansion: Idle Death Gamble";       bloomPass.strength = 3.5; idleFlash.classList.add('active');    }
+        else if(tech === 'love')     { glowColor = '#66ccff'; nameEl.style.color = '#88ddff'; nameEl.innerText = "Domain Expansion: Authentic Mutual Love";   bloomPass.strength = 3.0; idleFlash.classList.remove('active'); }
+        else if(tech === 'sentence') { glowColor = '#ffaa33'; nameEl.style.color = '#ffbb55'; nameEl.innerText = "Domain Expansion: Deadly Sentencing";       bloomPass.strength = 0.6; idleFlash.classList.remove('active'); }
         else { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Neutral State"; bloomPass.strength = 1.0; idleFlash.classList.remove('active'); }
 
         for(let i=0; i<COUNT; i++) {
@@ -331,11 +483,13 @@
                     p = { x: r*Math.sin(ph)*Math.cos(t), y: r*Math.sin(ph)*Math.sin(t), z: r*Math.cos(ph), r: 0.1, g: 0.1, b: 0.2, s: 0.4 };
                 } else p = { x:0, y:0, z:0, r:0, g:0, b:0, s:0 };
             }
-            else if(tech === 'red') p = getRed(i);
-            else if(tech === 'void') p = getVoid(i);
-            else if(tech === 'purple') p = getPurple(i);
-            else if(tech === 'shrine') p = getShrine(i);
-            else if(tech === 'idle') p = getIdleDeathGamble(i);
+            else if(tech === 'red')      p = getRed(i);
+            else if(tech === 'void')     p = getVoid(i);
+            else if(tech === 'purple')   p = getPurple(i);
+            else if(tech === 'shrine')   p = getShrine(i);
+            else if(tech === 'idle')     p = getIdleDeathGamble(i);
+            else if(tech === 'love')     p = getAuthenticMutualLove(i);
+            else if(tech === 'sentence') p = getDeadlySentencing(i);
             
             targetPositions[i*3] = p.x; targetPositions[i*3+1] = p.y; targetPositions[i*3+2] = p.z;
             targetColors[i*3] = p.r; targetColors[i*3+1] = p.g; targetColors[i*3+2] = p.b;
@@ -352,7 +506,7 @@
     });
     cameraUtils.start();
 
-    // Animation
+    // ─── Animation Loop ──────────────────────────────────────────────────────
     function animate() {
         requestAnimationFrame(animate);
         idleTime += 0.01;
@@ -377,7 +531,6 @@
         particles.geometry.attributes.color.needsUpdate = true;
         particles.geometry.attributes.size.needsUpdate = true;
         
-        // UPDATED ROTATION LOGIC: Locking rotation for Shrine
         if(currentTech === 'red') {
             particles.rotation.z -= 0.1;
         } else if (currentTech === 'purple') {
@@ -390,10 +543,17 @@
             // Slow ominous anti-clockwise precession — fate turning backward
             particles.rotation.y -= 0.008;
             particles.rotation.z += 0.003;
-            // Bloom pulses like a probability "dice roll"
             bloomPass.strength = 3.0 + Math.sin(idleTime * 2.2) * 1.2;
+        } else if (currentTech === 'love') {
+            // Ring orbits around the sword's Y axis
+            particles.rotation.y += 0.012;
+            bloomPass.strength = 2.8 + Math.sin(idleTime * 1.8) * 0.5;
+        } else if (currentTech === 'sentence') {
+            // Gavel frozen mid-swing — lock all rotation so the shape reads clearly
+            particles.rotation.set(0, 0, 0);
+            bloomPass.strength = 0.6;
         } else {
-            // Default Neutral rotation
+            // Default neutral rotation
             particles.rotation.y += 0.005;
         }
 
