@@ -385,7 +385,75 @@
         }
     }
 
-    // ─── Hand Tracking ───────────────────────────────────────────────────────
+    //CSJ
+    function getPalace(i) {
+        const total = COUNT;
+        if(i < total * 0.05){ // Background Particles
+            return {x:(Math.random()-0.5)*100,y:(Math.random()-0.2)*80,z:(Math.random()-0.5)*80,r:Math.random(),g:0,b:Math.random(),s:0.2};
+        }else if(i < total * 0.45) { // Ground
+            return {x: (Math.random()-0.5)*150, y:-15,z: (Math.random()-0.5)*150,r:2,g:0,b:3,s:0.8};
+        }else if(i < total * 0.6) { // Top Outer Eye
+            const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+            const curve = Math.pow(rad/30, 2) * 20; 
+            return { x: rad*Math.cos(t), y: 30 - curve + (Math.random()*2), z: rad*Math.sin(t)*0.6, r: 3, g: 0, b: 0, s: 0.6 };
+        }else if(i < total * 0.80) { // Bottom Outer Eye    
+            const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+            const curve = Math.pow(rad/30, 2) * -20; 
+            return { x: rad*Math.cos(t), y: -5 - curve + (Math.random()*2), z: rad*Math.sin(t)*0.6, r: 3, g: 0, b: 0, s: 0.6 };
+        }else if(i < total * 0.90) { // Back Inner Eye
+            const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+            const curve = Math.pow(rad/30, 2) * -3; 
+            return { x: rad*Math.cos(t) / 2, y:13 + rad*Math.sin(t)*0.6, z:-5 - curve + (Math.random()*2), r: 0.6, g: 0.6, b: 0.6, s: 0.6 };
+        }else if(i < total * 1) { // Front Inner Eye
+            const t = Math.random() * Math.PI * 2; const rad = Math.random() * 30;
+            const curve = Math.pow(rad/30, 2) * 3; 
+            return { x: rad*Math.cos(t) / 2, y:13 + rad*Math.sin(t)*0.6, z:0 - curve + (Math.random()*2), r: 0.6, g: 0.6, b: 0.6, s: 0.6 };
+        }else{
+            return {x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 }
+        }
+    }
+    function getPerfection(i){ 
+        const total = COUNT;
+        if(i < total * 0.1){ //wrist/base
+            return { x: 0 + (Math.random()-0.5) * 20, y: -15 + (Math.random()-1) * 30, z: 20 + (Math.random()-0) * 20, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.2){
+            return { x: 0 + (Math.random()-0.5) * 20, y: -15 + (Math.random()-1) * 30, z: -20 + (Math.random()-1) * 20, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if( i < total * 0.3){ //palm
+            return { x: 0 + (Math.random()-0.5) * 20, y: -15 + (Math.random()-1) * 5, z: 20 + (Math.random()-0) * 35, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.4){
+            return { x: 0 + (Math.random()-0.5) * 20, y: -15 + (Math.random()-1) * 5, z: -20 + (Math.random()-1) * 35, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.425){//thumb base
+            return { x: 12 + (Math.random()-0.5) * 10, y: -15 + (Math.random()-1) * 2, z: 30 + (Math.random()-0) * 4.5, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.45){
+            return { x: 12 + (Math.random()-0.5) * 10, y: -15 + (Math.random()-1) * 2, z: -30 + (Math.random()-1) * 4.5, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.5){//thumb
+            return { x: 15 + (Math.random()-0.5) * 4, y: -15 + (Math.random()-0) * 4, z: 30 + (Math.random()-0) * 4.5, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.55){
+            return { x: 15 + (Math.random()-0.5) * 4, y: -15 + (Math.random()-0) * 4, z: -30 + (Math.random()-1) * 4.5, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.6){//index
+            return { x: 8 + (Math.random()-0.5) * 3, y: -15 + (Math.random()-0) * 10, z: 50 + (Math.random()-0) * 3, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.65){
+            return { x: 8 + (Math.random()-0.5) * 3, y: -15 + (Math.random()-0) * 10, z: -50 + (Math.random()-1) * 3, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.7){//middle
+            return { x: 3 + (Math.random()-0.5) * 3, y: -15 + (Math.random()-0) * 14, z: 50 + (Math.random()-0) * 3, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.75){
+            return { x: 3 + (Math.random()-0.5) * 3, y: -15 + (Math.random()-0) * 14, z: -50 + (Math.random()-1) * 3, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.8){//ring
+            return { x: -2 + (Math.random()-0.5) * 3, y: -15 + (Math.random()-0) * 10, z: 50 + (Math.random()-0) * 3, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.85){
+            return { x: -2 + (Math.random()-0.5) * 3, y: -15 + (Math.random()-0) * 10, z: -50 + (Math.random()-1) * 3, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.875){//pinky
+            return { x: -7 + (Math.random()-0.5) * 3, y: -15 + (Math.random()-0) * 6, z: 50 + (Math.random()-0) * 3, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i < total * 0.9){
+            return { x: -7 + (Math.random()-0.5) * 3, y: -15 + (Math.random()-0) * 6, z: -50 + (Math.random()-1) * 3, r: 0.1, g: 0, b: 0, s: 0.0 };
+        }else if(i <total * 1){
+            return {x: (Math.random()-0.5) * 80, y: (Math.random()-0.5) * 50, z: (Math.random()-0.5) * 50, r: 0.03, g: 0, b: 0, s: 0.5 }
+        }
+        return { x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 };
+    }
+    
+
+    // Hand Tracking
     let currentTech = 'neutral';
     let shakeIntensity = 0;
     let idleTime = 0;
@@ -440,6 +508,7 @@
             if (detected === 'neutral') {
                 const lm = results.multiHandLandmarks[0];
                 const isUp = (t, p) => lm[t].y < lm[p].y;
+                
                 const pinch = Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y);
 
                 if (pinch < 0.04) detected = 'purple';
@@ -454,6 +523,8 @@
                 else if (isUp(8,6) && isUp(12,10) && !isUp(16,14)) detected = 'void';
                 // Red: index up only, pinky down (guards against ILY)
                 else if (isUp(8,6) && !isUp(12,10) && !isUp(20,18)) detected = 'red';
+                else if (isUp(4,3) && isUp(8,6) && !isUp(12,10) && !isUp(16,14) && isUp(20,18)) detected = 'palace';
+                else if (isUp(4,3) && isUp(8,6) && isUp(12,10) && isUp(16,14) && isUp(20,18)) detected = 'perfection';
             }
         }
         updateState(detected);
@@ -473,8 +544,10 @@
         else if(tech === 'idle')     { glowColor = '#aa00ff'; nameEl.style.color = '#9933ff'; nameEl.innerText = "Domain Expansion: Idle Death Gamble";       bloomPass.strength = 3.5; idleFlash.classList.add('active');    }
         else if(tech === 'love')     { glowColor = '#66ccff'; nameEl.style.color = '#88ddff'; nameEl.innerText = "Domain Expansion: Authentic Mutual Love";   bloomPass.strength = 3.0; idleFlash.classList.remove('active'); }
         else if(tech === 'sentence') { glowColor = '#ffaa33'; nameEl.style.color = '#ffbb55'; nameEl.innerText = "Domain Expansion: Deadly Sentencing";       bloomPass.strength = 0.6; idleFlash.classList.remove('active'); }
+        else if(tech === 'palace') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Time Cell Moon Palace"; bloomPass.strength = 2.5;}
+        else if(tech === 'perfection') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Self Embodiment of Perfection"; bloomPass.strength = 2.5;}
         else { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Neutral State"; bloomPass.strength = 1.0; idleFlash.classList.remove('active'); }
-
+        
         for(let i=0; i<COUNT; i++) {
             let p;
             if(tech === 'neutral') {
@@ -490,6 +563,8 @@
             else if(tech === 'idle')     p = getIdleDeathGamble(i);
             else if(tech === 'love')     p = getAuthenticMutualLove(i);
             else if(tech === 'sentence') p = getDeadlySentencing(i);
+            else if(tech === 'palace') p = getPalace(i);
+            else if(tech === 'perfection') p = getPerfection(i);
             
             targetPositions[i*3] = p.x; targetPositions[i*3+1] = p.y; targetPositions[i*3+2] = p.z;
             targetColors[i*3] = p.r; targetColors[i*3+1] = p.g; targetColors[i*3+2] = p.b;
@@ -552,6 +627,10 @@
             // Gavel frozen mid-swing — lock all rotation so the shape reads clearly
             particles.rotation.set(0, 0, 0);
             bloomPass.strength = 0.6;
+        }else if(currentTech === 'palace'){
+            particles.rotation.y +=0.0005;
+        }else if(currentTech === 'perfection'){
+            particles.rotation.y +=0.05;
         } else {
             // Default neutral rotation
             particles.rotation.y += 0.005;
