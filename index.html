@@ -195,6 +195,10 @@
             return {x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 }
         }
     }
+    function getPerfection(i){ //Designing in a different project currently
+        const total = COUNT;
+        return {x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 }
+    }
     
 
     // Hand Tracking
@@ -226,7 +230,7 @@
                 else if (isUp(8,6) && isUp(12,10) && isUp(16,14) && isUp(20,18)) detected = 'shrine';
                 else if (isUp(8,6) && isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'void';
                 else if (!isUp(4,3) && isUp(8,6) && !isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'red';
-                else if (isUp(4,3) && isUp(8,6) && !isUp(12,10) && !isUp(16,14) && !isUp(20,18)) detected = 'palace';
+                else if (isUp(4,3) && isUp(8,6) && !isUp(12,10) && !isUp(16,14) && isUp(20,18)) detected = 'palace';
             });
         }
         updateState(detected);
@@ -243,6 +247,7 @@
         else if(tech === 'void') { glowColor = '#00ffff'; nameEl.innerText = "Domain Expansion: Infinite Void"; bloomPass.strength = 2.0; }
         else if(tech === 'red') { glowColor = '#ff3333'; nameEl.innerText = "Reverse Cursed Technique: Red"; bloomPass.strength = 2.5; }
         else if(tech === 'palace') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Time Cell Moon Palace"; bloomPass.strength = 2.5;}
+        else if(tech === 'perfection') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Self Embodiment of Perfection"; bloomPass.strength = 2.5;}
         else { glowColor = '#00ffff'; nameEl.innerText = "Neutral State"; bloomPass.strength = 1.0; }
 
         for(let i=0; i<COUNT; i++) {
@@ -258,6 +263,7 @@
             else if(tech === 'purple') p = getPurple(i);
             else if(tech === 'shrine') p = getShrine(i);
             else if(tech === 'palace') p = getPalace(i);
+            else if(tech === 'perfection') p = getPerfection(i);
             
             targetPositions[i*3] = p.x; targetPositions[i*3+1] = p.y; targetPositions[i*3+2] = p.z;
             targetColors[i*3] = p.r; targetColors[i*3+1] = p.g; targetColors[i*3+2] = p.b;
@@ -309,6 +315,8 @@
             particles.rotation.set(0, 0, 0); 
         }else if(currentTech === 'palace'){
             particles.rotation.y +=0.0005;
+        }else if(currentTech === 'perfection'){
+        
         }else {
             // Default Neutral rotation
             particles.rotation.y += 0.005;
