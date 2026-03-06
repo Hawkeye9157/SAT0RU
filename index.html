@@ -33,6 +33,36 @@
             transition: color 0.3s ease;
         }
 
+        #trigger-word-text { 
+            font-size: 1.2rem; 
+            color: #ff0000; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+
+
+            animation: ease-in flicker 5s forwards ;
+        }
+
+        @keyframes flicker {
+            0%   { opacity: 1; }
+            50%  { opacity: 1; }
+            
+            75%  { opacity: 1; }
+
+            80%  { opacity: 0.0; }
+            82%  { opacity: 1; }
+            84%  { opacity: 0; }
+            88%  { opacity: 1; }
+            90%  { opacity: 0; }
+            92%  { opacity: 1; }
+            95%  { opacity: 0; }
+            97%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         /* Large Centered Camera Hub - Taller for Reel Context */
         #video-container {
             position: absolute;
@@ -98,6 +128,7 @@
     <div id="ui">
         <h1>呪術廻戦</h1>
         <div id="technique-name">CURSED ENERGY</div>
+        <div id="trigger-word-text"></div>
     </div>
 
     <div id="video-container">
@@ -110,11 +141,111 @@
     import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
     import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    
+    const INITIAL_CAMERA_Z = 55;
+
+    // Function to zoom out/in by a specified amount
+    function zoomOut(amount, duration) {
+        const startZ = camera.position.z;
+        const targetZ = startZ + amount;
+        const startTime = performance.now();
+
+        function animate(time) {
+            const progress = Math.min((time - startTime) / duration, 1);
+            camera.position.z = startZ + (targetZ - startZ) * progress;
+            if (progress < 1) requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    // Function to zoom back to starting position
+    function zoomBack(duration) {
+        const startZ = camera.position.z;
+        const targetZ = INITIAL_CAMERA_Z;
+        const startTime = performance.now();
+
+        function animate(time) {
+            const progress = Math.min((time - startTime) / duration, 1);
+            camera.position.z = startZ + (targetZ - startZ) * progress;
+            if (progress < 1) requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    // ---- Voice Recognition ---- 
+
+    let rotationLocked = false;
+    const triggerWords = ["don't move", "run away"];
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+            .map(result => result[0].transcript)
+            .join('')
+            .toLowerCase();
+
+        const output = document.getElementById("trigger-word-text");
+        
+        let animationTimeout = null;
+
+        if (transcript.includes(triggerWords[0]) && !rotationLocked) {
+            rotationLocked = true;
+            const word = triggerWords[0];
+
+            if (animationTimeout) {
+                clearTimeout(animationTimeout);
+            }
+
+            output.style.animation = 'none';
+            output.textContent = word;
+
+            void output.offsetWidth;
+
+            output.style.animation = 'flicker 5s forwards';
+
+            animationTimeout = setTimeout(() => {
+                rotationLocked = false;
+                output.style.animation = 'none';
+                output.textContent = '';
+            }, 5000);
+
+            return;
+        }
+
+        if (transcript.includes(triggerWords[1])) {
+            const word = triggerWords[1];
+
+            if (animationTimeout) {
+                clearTimeout(animationTimeout);
+            }
+
+            output.style.animation = 'none';
+            output.textContent = word;
+
+            void output.offsetWidth;
+
+            zoomOut(10000, 1000);
+            output.style.animation = 'flicker 5s forwards';
+
+            animationTimeout = setTimeout(() => {
+                output.style.animation = 'none';
+                output.textContent = '';
+                zoomBack(1000);
+            }, 5000);
+
+            return;
+        }
+    };
 
     // --- Scene & Rendering ---
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 55;
+    camera.position.z = INITIAL_CAMERA_Z;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -530,6 +661,12 @@
         updateState(detected);
     });
 
+
+    recognition.onerror = (e) => console.error('Speech error:', e.error);
+    recognition.onend = () => recognition.start();
+
+    recognition.start();
+
     function updateState(tech) {
         if(currentTech === tech) return;
         currentTech = tech;
@@ -586,7 +723,7 @@
         requestAnimationFrame(animate);
         idleTime += 0.01;
         
-        if (shakeIntensity > 0) {
+        if (shakeIntensity > 0 && !rotationLocked) {
             renderer.domElement.style.transform = `translate(${(Math.random()-0.5)*shakeIntensity*40}px, ${(Math.random()-0.5)*shakeIntensity*40}px)`;
         } else {
             renderer.domElement.style.transform = 'translate(0,0)';
@@ -607,33 +744,51 @@
         particles.geometry.attributes.size.needsUpdate = true;
         
         if(currentTech === 'red') {
-            particles.rotation.z -= 0.1;
+            if(!rotationLocked) {
+                particles.rotation.z -= 0.1;
+            }
         } else if (currentTech === 'purple') {
-            particles.rotation.z += 0.2; 
-            particles.rotation.y += 0.05;
+            if(!rotationLocked) {
+                particles.rotation.z += 0.2; 
+                particles.rotation.y += 0.05;
+            }
         } else if (currentTech === 'shrine') {
             // FORCE UPRIGHT: Reset and freeze all rotations
-            particles.rotation.set(0, 0, 0); 
+            if(!rotationLocked) {
+                particles.rotation.set(0, 0, 0); 
+            }
         } else if (currentTech === 'idle') {
             // Slow ominous anti-clockwise precession — fate turning backward
-            particles.rotation.y -= 0.008;
-            particles.rotation.z += 0.003;
-            bloomPass.strength = 3.0 + Math.sin(idleTime * 2.2) * 1.2;
+            if(!rotationLocked) {
+                particles.rotation.y -= 0.008;
+                particles.rotation.z += 0.003;
+                bloomPass.strength = 3.0 + Math.sin(idleTime * 2.2) * 1.2;
+            }
         } else if (currentTech === 'love') {
             // Ring orbits around the sword's Y axis
-            particles.rotation.y += 0.012;
-            bloomPass.strength = 2.8 + Math.sin(idleTime * 1.8) * 0.5;
+            if(!rotationLocked) {
+                particles.rotation.y += 0.012;
+                bloomPass.strength = 2.8 + Math.sin(idleTime * 1.8) * 0.5;
+            }
         } else if (currentTech === 'sentence') {
             // Gavel frozen mid-swing — lock all rotation so the shape reads clearly
-            particles.rotation.set(0, 0, 0);
-            bloomPass.strength = 0.6;
+            if(!rotationLocked) {
+                particles.rotation.set(0, 0, 0);
+                bloomPass.strength = 0.6;
+            }
         }else if(currentTech === 'palace'){
-            particles.rotation.y +=0.0005;
+            if(!rotationLocked) {
+                particles.rotation.y +=0.0005;
+            }
         }else if(currentTech === 'perfection'){
-            particles.rotation.y +=0.05;
+            if(!rotationLocked) {
+                particles.rotation.y +=0.05;
+            }
         } else {
             // Default neutral rotation
-            particles.rotation.y += 0.005;
+            if(!rotationLocked) {
+                particles.rotation.y += 0.005;
+            }
         }
 
         composer.render();
