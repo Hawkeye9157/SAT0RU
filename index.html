@@ -754,27 +754,41 @@
             }
         } else if (currentTech === 'shrine') {
             // FORCE UPRIGHT: Reset and freeze all rotations
-            particles.rotation.set(0, 0, 0); 
+            if(!rotationLocked) {
+                particles.rotation.set(0, 0, 0); 
+            }
         } else if (currentTech === 'idle') {
             // Slow ominous anti-clockwise precession — fate turning backward
-            particles.rotation.y -= 0.008;
-            particles.rotation.z += 0.003;
-            bloomPass.strength = 3.0 + Math.sin(idleTime * 2.2) * 1.2;
+            if(!rotationLocked) {
+                particles.rotation.y -= 0.008;
+                particles.rotation.z += 0.003;
+                bloomPass.strength = 3.0 + Math.sin(idleTime * 2.2) * 1.2;
+            }
         } else if (currentTech === 'love') {
             // Ring orbits around the sword's Y axis
-            particles.rotation.y += 0.012;
-            bloomPass.strength = 2.8 + Math.sin(idleTime * 1.8) * 0.5;
+            if(!rotationLocked) {
+                particles.rotation.y += 0.012;
+                bloomPass.strength = 2.8 + Math.sin(idleTime * 1.8) * 0.5;
+            }
         } else if (currentTech === 'sentence') {
             // Gavel frozen mid-swing — lock all rotation so the shape reads clearly
-            particles.rotation.set(0, 0, 0);
-            bloomPass.strength = 0.6;
+            if(!rotationLocked) {
+                particles.rotation.set(0, 0, 0);
+                bloomPass.strength = 0.6;
+            }
         }else if(currentTech === 'palace'){
-            particles.rotation.y +=0.0005;
+            if(!rotationLocked) {
+                particles.rotation.y +=0.0005;
+            }
         }else if(currentTech === 'perfection'){
-            particles.rotation.y +=0.05;
+            if(!rotationLocked) {
+                particles.rotation.y +=0.05;
+            }
         } else {
             // Default neutral rotation
-            particles.rotation.y += 0.005;
+            if(!rotationLocked) {
+                particles.rotation.y += 0.005;
+            }
         }
 
         composer.render();
