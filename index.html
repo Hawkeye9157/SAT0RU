@@ -141,6 +141,40 @@
     import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
     import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+    // ─── AUDIO SYSTEM ─────────────────────────────────────
+
+    const sounds = {
+        red: new Audio("./audio/red.mp3"),
+        purple: new Audio("./audio/purple.mp3"),
+        shrine: new Audio("./audio/shrine.mp3"),
+        void: new Audio("./audio/void.mp3"),
+        idle: new Audio("./audio/idle.mp3"),
+        love: new Audio("./audio/love.mp3"),
+        sentence: new Audio("./audio/sentence.mp3"),
+        palace: new Audio("./audio/palace.mp3"),
+        perfection: new Audio("./audio/perfection.mp3")
+    };
+
+    Object.values(sounds).forEach(s => {
+        s.volume = 0.9;
+        s.loop = true;   // optional
+    });
+
+    function playSound(name){
+        Object.values(sounds).forEach(s => {
+            s.pause();
+            s.currentTime = 0;
+        });
+
+        if(sounds[name]){
+            sounds[name].play().catch(()=>{});
+        }
+    }
+
+    window.addEventListener("click", () => {
+        Object.values(sounds).forEach(s => s.load());
+    }, { once: true });
     
     const INITIAL_CAMERA_Z = 55;
 
@@ -582,7 +616,6 @@
         }
         return { x: 0, y: 0, z: 0, r: 0, g: 0, b: 0, s: 0 };
     }
-    
 
     // Hand Tracking
     let currentTech = 'neutral';
@@ -674,16 +707,16 @@
         shakeIntensity = tech !== 'neutral' ? 0.4 : 0;
         idleTime = 0;
 
-        if(tech === 'shrine')   { glowColor = '#ff0000'; nameEl.style.color = '#ff3333'; nameEl.innerText = "Domain Expansion: Malevolent Shrine";     bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
-        else if(tech === 'purple')   { glowColor = '#bb00ff'; nameEl.style.color = '#cc66ff'; nameEl.innerText = "Secret Technique: Hollow Purple";           bloomPass.strength = 4.0; idleFlash.classList.remove('active'); }
-        else if(tech === 'void')     { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Domain Expansion: Infinite Void";           bloomPass.strength = 2.0; idleFlash.classList.remove('active'); }
-        else if(tech === 'red')      { glowColor = '#ff3333'; nameEl.style.color = '#ff4444'; nameEl.innerText = "Reverse Cursed Technique: Red";             bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
-        else if(tech === 'idle')     { glowColor = '#aa00ff'; nameEl.style.color = '#9933ff'; nameEl.innerText = "Domain Expansion: Idle Death Gamble";       bloomPass.strength = 3.5; idleFlash.classList.add('active');    }
-        else if(tech === 'love')     { glowColor = '#66ccff'; nameEl.style.color = '#88ddff'; nameEl.innerText = "Domain Expansion: Authentic Mutual Love";   bloomPass.strength = 3.0; idleFlash.classList.remove('active'); }
-        else if(tech === 'sentence') { glowColor = '#ffaa33'; nameEl.style.color = '#ffbb55'; nameEl.innerText = "Domain Expansion: Deadly Sentencing";       bloomPass.strength = 0.6; idleFlash.classList.remove('active'); }
-        else if(tech === 'palace') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Time Cell Moon Palace"; bloomPass.strength = 2.5;}
-        else if(tech === 'perfection') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Self Embodiment of Perfection"; bloomPass.strength = 2.5;}
-        else { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Neutral State"; bloomPass.strength = 1.0; idleFlash.classList.remove('active'); }
+        if(tech === 'shrine')   { glowColor = '#ff0000'; nameEl.style.color = '#ff3333'; nameEl.innerText = "Domain Expansion: Malevolent Shrine";     bloomPass.strength = 2.5; idleFlash.classList.remove('active'); playSound("shrine")}
+        else if(tech === 'purple')   { glowColor = '#bb00ff'; nameEl.style.color = '#cc66ff'; nameEl.innerText = "Secret Technique: Hollow Purple";           bloomPass.strength = 4.0; idleFlash.classList.remove('active'); playSound("purple");}
+        else if(tech === 'void')     { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Domain Expansion: Infinite Void";           bloomPass.strength = 2.0; idleFlash.classList.remove('active'); playSound("void");}
+        else if(tech === 'red')      { glowColor = '#ff3333'; nameEl.style.color = '#ff4444'; nameEl.innerText = "Reverse Cursed Technique: Red";             bloomPass.strength = 2.5; idleFlash.classList.remove('active'); playSound("red");}
+        else if(tech === 'idle')     { glowColor = '#aa00ff'; nameEl.style.color = '#9933ff'; nameEl.innerText = "Domain Expansion: Idle Death Gamble";       bloomPass.strength = 3.5; idleFlash.classList.add('active'); playSound("idle");   }
+        else if(tech === 'love')     { glowColor = '#66ccff'; nameEl.style.color = '#88ddff'; nameEl.innerText = "Domain Expansion: Authentic Mutual Love";   bloomPass.strength = 3.0; idleFlash.classList.remove('active'); playSound("love"); }
+        else if(tech === 'sentence') { glowColor = '#ffaa33'; nameEl.style.color = '#ffbb55'; nameEl.innerText = "Domain Expansion: Deadly Sentencing";       bloomPass.strength = 0.6; idleFlash.classList.remove('active'); playSound("sentence"); }
+        else if(tech === 'palace') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Time Cell Moon Palace"; bloomPass.strength = 2.5; playSound("palace");} 
+        else if(tech === 'perfection') {glowColor = '#ff0000'; nameEl.innerText = "Domain Expansion: Self Embodiment of Perfection"; bloomPass.strength = 2.5; playSound("perfection");}
+        else { glowColor = '#00ffff'; nameEl.style.color = '#00ffff'; nameEl.innerText = "Neutral State"; bloomPass.strength = 1.0; idleFlash.classList.remove('active'); playSound("")}
         
         for(let i=0; i<COUNT; i++) {
             let p;
