@@ -31,6 +31,78 @@
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
             transition: color 0.3s ease;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #technique-name.transition {
+            animation: techniqueSwap 0.6s ease-out;
+        }
+
+        @keyframes techniqueSwap {
+            0% { opacity: 0.3; transform: scale(0.8) rotateY(45deg); }
+            50% { opacity: 0; transform: scale(0.6) rotateY(90deg); }
+            100% { opacity: 1; transform: scale(1) rotateY(0deg); }
+        }
+
+        #combo-counter {
+            position: absolute;
+            top: 15%;
+            right: 40px;
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: #ff6600;
+            text-shadow: 0 0 20px rgba(255, 102, 0, 0.8), 0 0 40px rgba(255, 102, 0, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        #combo-counter.active {
+            animation: comboAppear 0.4s ease-out forwards;
+        }
+
+        @keyframes comboAppear {
+            0% { opacity: 0; transform: scale(0.5) translateY(-20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        #combo-counter.pulse {
+            animation: comboPulse 0.3s ease-out;
+        }
+
+        @keyframes comboPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        #combo-bar {
+            position: absolute;
+            top: 1%;
+            right: 40px;
+            width: 0px;
+            height: 8px;
+            background: linear-gradient(to right, #ff3333, #ff6600, #ffaa00);
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.9);
+            transition: width 0.2s ease;
+            border-radius: 4px;
+        }
+
+        #combo-text {
+            position: absolute;
+            top: 18%;
+            right: 40px;
+            font-size: 0.9rem;
+            color: #ffaa00;
+            letter-spacing: 2px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #combo-text.show {
+            opacity: 1;
         }
 
         #trigger-word-text { 
@@ -41,8 +113,6 @@
             letter-spacing: 4px;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-
-
             animation: ease-in flicker 5s forwards ;
         }
 
@@ -63,7 +133,32 @@
             100% { opacity: 0; }
         }
 
-        /* Large Centered Camera Hub - Taller for Reel Context */
+        /* Hit indicator floating text */
+        .combo-hit {
+            position: fixed;
+            pointer-events: none;
+            z-index: 16;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+        }
+
+        @keyframes hitFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(0.5); }
+        }
+
+        .combo-hit.hit {
+            color: #ffff00;
+            animation: hitFloat 0.8s ease-out forwards;
+        }
+
+        .combo-hit.perfect {
+            color: #ff00ff;
+            animation: hitFloat 0.8s ease-out forwards;
+        }
+
         #video-container {
             position: absolute;
             bottom: 2%;
@@ -78,6 +173,12 @@
             border-radius: 25px;
             overflow: hidden;
             box-shadow: 0 0 40px rgba(0,0,0,0.9);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #video-container.combo-active {
+            border-color: rgba(255, 102, 0, 0.6);
+            box-shadow: 0 0 60px rgba(255, 102, 0, 0.6);
         }
 
         video { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
@@ -106,6 +207,23 @@
             60%  { opacity: 0.6; }
             100% { opacity: 0; }
         }
+
+        /* Flash effect for successful combos */
+        #combo-flash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 8;
+            opacity: 0;
+            background: radial-gradient(ellipse at center, rgba(255,102,0,0.4) 0%, transparent 70%);
+        }
+
+        #combo-flash.active {
+            animation: comboFlash 0.5s ease-out;
+        }
+
+        @keyframes comboFlash {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
     </style>
     
     <script type="importmap">
@@ -124,11 +242,15 @@
 
     <div id="grain"></div>
     <div id="idle-flash"></div>
+    <div id="combo-flash"></div>
 
     <div id="ui">
         <h1>呪術廻戦</h1>
         <div id="technique-name">CURSED ENERGY</div>
         <div id="trigger-word-text"></div>
+        <div id="combo-counter"></div>
+        <div id="combo-bar"></div>
+        <div id="combo-text">COMBO</div>
     </div>
 
     <div id="video-container">
@@ -144,7 +266,104 @@
     
     const INITIAL_CAMERA_Z = 55;
 
-    // Function to zoom out/in by a specified amount
+    // ─── COMBO SYSTEM ────────────────────────────────────────────────────────
+    const comboSystem = {
+        count: 0,
+        sequence: [],
+        lastTechTime: 0,
+        comboTimeout: 3000, // 3 seconds to continue combo
+        maxCombo: 0,
+        isActive: false,
+        validSequences: [
+            ['red', 'void'],
+            ['void', 'red'],
+            ['purple', 'shrine'],
+            ['shrine', 'love'],
+            ['love', 'sentence'],
+            ['sentence', 'purple'],
+            ['red', 'purple', 'void'],
+            ['shrine', 'love', 'idle'],
+        ]
+    };
+
+    function addToCombo(tech) {
+        const now = performance.now();
+        
+        // Reset combo if timeout exceeded
+        if (now - comboSystem.lastTechTime > comboSystem.comboTimeout) {
+            comboSystem.sequence = [];
+            comboSystem.count = 0;
+        }
+
+        comboSystem.sequence.push(tech);
+        comboSystem.count++;
+        comboSystem.lastTechTime = now;
+        comboSystem.isActive = true;
+
+        // Check for perfect matches
+        const isPerfectMatch = comboSystem.validSequences.some(seq => 
+            comboSystem.sequence.slice(-seq.length).every((t, i) => t === seq[i])
+        );
+
+        if (isPerfectMatch) {
+            triggerComboHit(comboSystem.count, true);
+        } else {
+            triggerComboHit(comboSystem.count, false);
+        }
+
+        if (comboSystem.count > comboSystem.maxCombo) {
+            comboSystem.maxCombo = comboSystem.count;
+        }
+
+        updateComboUI();
+    }
+
+    function triggerComboHit(count, isPerfect) {
+        // Flash screen
+        const flash = document.getElementById('combo-flash');
+        flash.classList.remove('active');
+        void flash.offsetWidth;
+        flash.classList.add('active');
+
+        // Floating text
+        const hitText = document.createElement('div');
+        hitText.className = `combo-hit ${isPerfect ? 'perfect' : 'hit'}`;
+        hitText.textContent = isPerfect ? `PERFECT x${count}!` : `HIT x${count}`;
+        hitText.style.left = (window.innerWidth * 0.5 + (Math.random() - 0.5) * 200) + 'px';
+        hitText.style.top = (window.innerHeight * 0.5 + (Math.random() - 0.5) * 200) + 'px';
+        document.body.appendChild(hitText);
+
+        setTimeout(() => hitText.remove(), 800);
+    }
+
+    function updateComboUI() {
+        const counter = document.getElementById('combo-counter');
+        const bar = document.getElementById('combo-bar');
+        const text = document.getElementById('combo-text');
+
+        if (comboSystem.count > 0) {
+            counter.textContent = `x${comboSystem.count}`;
+            counter.classList.add('active');
+            counter.classList.remove('pulse');
+            void counter.offsetWidth;
+            counter.classList.add('pulse');
+
+            bar.style.width = Math.min(comboSystem.count * 15, 300) + 'px';
+            text.classList.add('show');
+        } else {
+            counter.classList.remove('active');
+            bar.style.width = '0px';
+            text.classList.remove('show');
+        }
+    }
+
+    function resetCombo() {
+        comboSystem.sequence = [];
+        comboSystem.count = 0;
+        comboSystem.isActive = false;
+        updateComboUI();
+    }
+
     function zoomOut(amount, duration) {
         const startZ = camera.position.z;
         const targetZ = startZ + amount;
@@ -669,10 +888,31 @@
 
     function updateState(tech) {
         if(currentTech === tech) return;
+        
+        // Add to combo before changing
+        if (tech !== 'neutral') {
+            addToCombo(tech);
+        } else {
+            resetCombo();
+        }
+
         currentTech = tech;
         const nameEl = document.getElementById('technique-name');
+        const videoContainer = document.getElementById('video-container');
+        
+        // Add transition animation
+        nameEl.classList.remove('transition');
+        void nameEl.offsetWidth;
+        nameEl.classList.add('transition');
+
         shakeIntensity = tech !== 'neutral' ? 0.4 : 0;
         idleTime = 0;
+
+        if (tech !== 'neutral') {
+            videoContainer.classList.add('combo-active');
+        } else {
+            videoContainer.classList.remove('combo-active');
+        }
 
         if(tech === 'shrine')   { glowColor = '#ff0000'; nameEl.style.color = '#ff3333'; nameEl.innerText = "Domain Expansion: Malevolent Shrine";     bloomPass.strength = 2.5; idleFlash.classList.remove('active'); }
         else if(tech === 'purple')   { glowColor = '#bb00ff'; nameEl.style.color = '#cc66ff'; nameEl.innerText = "Secret Technique: Hollow Purple";           bloomPass.strength = 4.0; idleFlash.classList.remove('active'); }
